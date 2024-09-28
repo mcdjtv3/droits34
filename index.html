@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz : Le Fonctionnement des Sociétés</title>
+    <style>
+        body {
+            font-family: 'Mayan', sans-serif;
+            margin: 0;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #333;
+            text-align: center;
+        }
+        .quiz-container, .summary {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            background-image: url('images/back.jpg.webp');
+            background-size: cover;
+            background-position: center;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #000;
+        }
+        .choices {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-left: 20%;
+        }
+        .choices li {
+            margin: 8px 0;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #FF0000;
+            color: white;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #CC0000;
+        }
+        .summary {
+            display: none;
+        }
+        .summary ul {
+            list-style: none;
+            padding: 0;
+        }
+        .summary li {
+            text-align: left;
+            margin-left: 20%;
+            margin-bottom: 10px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .quiz-container, .summary {
+                max-width: 90%;
+                margin: 20px auto;
+                padding: 15px;
+                border-radius: 10px;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            .quiz-container, .summary {
+                padding: 10px;
+                margin: 10px;
+                border-radius: 10px;
+            }
+            .question {
+                font-size: 16px;
+            }
+            button {
+                font-size: 12px;
+                padding: 6px 12px;
+                border-radius: 10px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .quiz-container, .summary {
+                max-width: 800px;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz-container">
+    <h2>QCM ENTRAINEMENT - Le Fonctionnement des Sociétés</h2>
+    <div id="question-container">
+        <!-- Les questions seront affichées ici dynamiquement -->
+    </div>
+    <button id="next-button" onclick="nextQuestion()">Suivant</button>
+</div>
+
+<div class="summary" id="summary">
+    <h3>Récapitulatif</h3>
+    <ul id="summary-list">
+        <!-- Le récapitulatif des réponses sera affiché ici -->
+    </ul>
+    <div class="score" id="score"></div>
+    <button onclick="restartQuiz()">Recommencer</button>
+</div>
+
+<script>
+    const quizData = [
+        { question: "Le dirigeant d'une SARL peut-il cumuler un emploi salarié dans la même société ?", choices: ["Non, c'est interdit par la loi", "Oui, à condition que les tâches de dirigeant priment sur celles du salarié", "Oui, sans aucune restriction", "Non, sauf dans les entreprises familiales"], correct: 1 },
+        { question: "Quelles sont les trois formes de responsabilité qui pèsent sur un dirigeant ?", choices: ["Civile, pénale, fiscale", "Financière, morale, juridique", "Sociale, environnementale, économique", "Commerciale, civile, administrative"], correct: 0 },
+        { question: "Exemple : Joséphine utilise les fonds de son entreprise pour acheter une voiture personnelle. Quelle responsabilité peut-elle engager ?", choices: ["Responsabilité civile uniquement", "Responsabilité pénale pour abus de biens sociaux", "Aucune, elle peut utiliser les fonds comme elle veut", "Responsabilité fiscale"], correct: 1 },
+        { question: "Quels sont les droits collectifs des associés ?", choices: ["Droit de vote, droit de contrôler les comptes, participation aux bénéfices", "Droit de veto sur toutes les décisions", "Droit de nommer un dirigeant à vie", "Droit d'exclure tout associé sans raison"], correct: 0 },
+        { question: "Exemple : Charles est associé dans une entreprise. Peut-il céder ses parts sociales sans l'accord des autres associés ?", choices: ["Oui, sans formalité", "Non, il doit respecter les clauses des statuts", "Oui, mais seulement en cas de liquidation", "Non, les parts sociales sont intransférables"], correct: 1 },
+        { question: "Quels sont les moyens pour un salarié de devenir actionnaire dans une société ?", choices: ["Vente de parts sociales", "Participation au capital via des plans d'intéressement", "Nomination par le dirigeant", "Participation à une élection interne"], correct: 1 },
+        { question: "Quel système permet aux salariés de participer aux bénéfices de l'entreprise ?", choices: ["La distribution d'actions gratuites", "La participation obligatoire aux bénéfices", "L'imposition sur le revenu des associés", "Le paiement d'une cotisation salariale"], correct: 1 },
+        { question: "Comment se termine le mandat d'un dirigeant ?", choices: ["À sa demande uniquement", "Lors de sa révocation par les associés ou à la fin de son mandat", "Lorsqu'il atteint l'âge de 65 ans", "Lorsqu'il souhaite céder ses parts sociales"], correct: 1 },
+        { question: "Exemple : Joséphine est révoquée de son poste de dirigeante. Peut-elle contester cette décision ?", choices: ["Non, c'est définitif", "Oui, elle peut contester si elle considère que la révocation est injustifiée", "Oui, mais seulement devant un tribunal pénal", "Non, sauf en cas de fraude"], correct: 1 },
+        { question: "Quels sont les moyens pour protéger les biens personnels du dirigeant en cas de dettes fiscales de la société ?", choices: ["Ils sont automatiquement protégés", "Faire une déclaration d'insaisissabilité ou opter pour un statut limité", "Revendre les actifs de l'entreprise", "Créer une nouvelle société"], correct: 1 }
+    ];
+
+    let currentQuestionIndex = 0;
+    let selectedAnswers = [];
+
+    function loadQuestion() {
+        const container = document.getElementById('question-container');
+        container.innerHTML = '';
+
+        const questionData = quizData[currentQuestionIndex];
+        const questionElem = document.createElement('div');
+        questionElem.className = 'question';
+        questionElem.textContent = questionData.question;
+
+        const choicesElem = document.createElement('ul');
+        choicesElem.className = 'choices';
+
+        questionData.choices.forEach((choice, index) => {
+            const choiceElem = document.createElement('li');
+            const choiceInput = document.createElement('input');
+            choiceInput.type = 'radio';
+            choiceInput.name = 'choice';
+            choiceInput.value = index;
+            choiceInput.id = `choice${index}`;
+            
+            const choiceLabel = document.createElement('label');
+            choiceLabel.htmlFor = `choice${index}`;
+            choiceLabel.textContent = choice;
+
+            choiceElem.appendChild(choiceInput);
+            choiceElem.appendChild(choiceLabel);
+            choicesElem.appendChild(choiceElem);
+        });
+
+        container.appendChild(questionElem);
+        container.appendChild(choicesElem);
+    }
+
+    function nextQuestion() {
+        const selectedChoice = document.querySelector('input[name="choice"]:checked');
+        if (!selectedChoice) {
+            alert("Veuillez sélectionner une réponse !");
+            return;
+        }
+
+        selectedAnswers.push(parseInt(selectedChoice.value));
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showSummary();
+        }
+    }
+
+    function showSummary() {
+        document.getElementById('quiz-container').style.display = 'none';
+        const summary = document.getElementById('summary');
+        summary.style.display = 'block';
+
+        const summaryList = document.getElementById('summary-list');
+        summaryList.innerHTML = '';
+
+        let correctAnswers = 0;
+
+        quizData.forEach((q, index) => {
+            const summaryItem = document.createElement('li');
+            summaryItem.innerHTML = `
+                <strong>${q.question}</strong><br>
+                <div style="text-align: left; margin-left: 20%;">
+                    Votre réponse: ${q.choices[selectedAnswers[index]]} - 
+                    ${selectedAnswers[index] === q.correct ? '<span class="correct">Correct</span>' : '<span class="incorrect">Incorrect</span>'}<br>
+                    Bonne réponse: ${q.choices[q.correct]}
+                </div>
+            `;
+            summaryList.appendChild(summaryItem);
+            if (selectedAnswers[index] === q.correct) {
+                correctAnswers++;
+            }
+        });
+
+        document.getElementById('score').textContent = `Score: ${correctAnswers} / ${quizData.length}`;
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        selectedAnswers = [];
+        document.getElementById('summary').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
